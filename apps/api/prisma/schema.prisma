@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  habits        Habit[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model Habit {
+  id            String    @id @default(uuid())
+  userId        String
+  name          String
+  description   String?
+  color         String    @default("#6366f1")
+  frequency     Frequency @default(DAILY)
+  customDays    Int[]     @default([])
+  targetPerWeek Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  archived      Boolean   @default(false)
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completions HabitCompletion[]
+
+  @@map("habits")
+}
+
+model HabitCompletion {
+  id          String   @id @default(uuid())
+  habitId     String
+  completedAt DateTime @db.Date
+  note        String?
+  createdAt   DateTime @default(now())
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, completedAt])
+  @@map("habit_completions")
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  CUSTOM
+}
