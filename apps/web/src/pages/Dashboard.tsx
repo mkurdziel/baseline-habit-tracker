@@ -47,8 +47,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-400">
           {new Date().toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
@@ -61,50 +61,50 @@ export default function Dashboard() {
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="card">
-            <div className="text-sm font-medium text-gray-500">Today's Progress</div>
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Today's Progress</div>
             <div className="mt-2 flex items-baseline">
-              <span className="text-3xl font-bold text-gray-900">
+              <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {stats.completedToday}
               </span>
-              <span className="ml-2 text-gray-500">/ {stats.activeHabits}</span>
+              <span className="ml-2 text-gray-500 dark:text-gray-400">/ {stats.activeHabits}</span>
             </div>
           </div>
 
           <div className="card">
-            <div className="text-sm font-medium text-gray-500">Completion Rate</div>
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Completion Rate</div>
             <div className="mt-2">
-              <span className="text-3xl font-bold text-gray-900">
+              <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {stats.overallCompletionRate}%
               </span>
             </div>
           </div>
 
           <div className="card">
-            <div className="text-sm font-medium text-gray-500">Active Habits</div>
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Habits</div>
             <div className="mt-2">
-              <span className="text-3xl font-bold text-gray-900">
+              <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {stats.activeHabits}
               </span>
             </div>
           </div>
 
           <div className="card">
-            <div className="text-sm font-medium text-gray-500">Top Streak</div>
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Top Streak</div>
             <div className="mt-2">
-              <span className="text-3xl font-bold text-gray-900">
+              <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 {stats.currentStreaks[0]?.streak || 0}
               </span>
-              <span className="ml-2 text-gray-500">days</span>
+              <span className="ml-2 text-gray-500 dark:text-gray-400">days</span>
             </div>
           </div>
         </div>
       )}
 
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Today's Habits</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Today's Habits</h2>
         {habits.length === 0 ? (
           <div className="card text-center py-12">
-            <p className="text-gray-500">No habits yet. Create your first habit to get started!</p>
+            <p className="text-gray-500 dark:text-gray-400">No habits yet. Create your first habit to get started!</p>
             <a href="/habits" className="btn btn-primary mt-4 inline-block">
               Create Habit
             </a>
@@ -125,12 +125,12 @@ export default function Dashboard() {
 
       {stats && stats.currentStreaks.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Current Streaks</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Current Streaks</h2>
           <div className="card">
             <div className="space-y-3">
               {stats.currentStreaks.map(streak => (
                 <div key={streak.habitId} className="flex items-center justify-between">
-                  <span className="text-gray-700">{streak.habitName}</span>
+                  <span className="text-gray-700 dark:text-gray-300">{streak.habitName}</span>
                   <span className="font-semibold text-primary-600">
                     {streak.streak} day{streak.streak !== 1 ? 's' : ''}
                   </span>

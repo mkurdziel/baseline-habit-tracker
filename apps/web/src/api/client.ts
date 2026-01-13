@@ -132,6 +132,12 @@ export const authApi = {
   },
 
   me: () => api('/auth/me'),
+
+  updatePreferences: (data: { theme?: string }) =>
+    api('/auth/preferences', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
 };
 
 export const habitsApi = {

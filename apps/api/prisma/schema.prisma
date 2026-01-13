@@ -12,6 +12,7 @@ model User {
   email        String   @unique
   passwordHash String
   name         String
+  theme        Theme    @default(SYSTEM)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -69,4 +70,10 @@ enum Frequency {
   DAILY
   WEEKLY
   CUSTOM
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
 }

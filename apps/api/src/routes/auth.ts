@@ -62,6 +62,7 @@ export async function authRoutes(server: FastifyInstance) {
           id: user.id,
           email: user.email,
           name: user.name,
+          theme: user.theme,
           createdAt: user.createdAt.toISOString(),
         },
         accessToken,
@@ -114,6 +115,7 @@ export async function authRoutes(server: FastifyInstance) {
           id: user.id,
           email: user.email,
           name: user.name,
+          theme: user.theme,
           createdAt: user.createdAt.toISOString(),
         },
         accessToken,
@@ -219,9 +221,38 @@ export async function authRoutes(server: FastifyInstance) {
       id: userData.id,
       email: userData.email,
       name: userData.name,
+      theme: userData.theme,
       createdAt: userData.createdAt.toISOString(),
     };
 
     return reply.send({ success: true, data: response });
+  });
+
+  // Update user preferences
+  server.patch('/preferences', { preHandler: authenticate }, async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { user } = request as AuthenticatedRequest;
+      const body = request.body as { theme?: string };
+
+      const updatedUser = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          ...(body.theme && { theme: body.theme as any }),
+        },
+      });
+
+      const response: User = {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        theme: updatedUser.theme,
+        createdAt: updatedUser.createdAt.toISOString(),
+      };
+
+      return reply.send({ success: true, data: response });
+    } catch (err) {
+      server.log.error(err);
+      return reply.status(500).send({ success: false, error: 'Internal server error' });
+    }
   });
 }
