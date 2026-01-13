@@ -43,6 +43,7 @@ model Habit {
   frequency     Frequency @default(DAILY)
   customDays    Int[]     @default([])
   targetPerWeek Int?
+  intervalDays  Int?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   archived      Boolean   @default(false)
@@ -70,6 +71,7 @@ enum Frequency {
   DAILY
   WEEKLY
   CUSTOM
+  INTERVAL
 }
 
 enum Theme {

@@ -8,18 +8,20 @@ const createHabitSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
-  frequency: z.enum(['DAILY', 'WEEKLY', 'CUSTOM']),
+  frequency: z.enum(['DAILY', 'WEEKLY', 'CUSTOM', 'INTERVAL']),
   customDays: z.array(z.number().min(0).max(6)).optional(),
   targetPerWeek: z.number().min(1).max(7).optional(),
+  intervalDays: z.number().min(2).max(365).optional(),
 });
 
 const updateHabitSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().max(500).nullable().optional(),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
-  frequency: z.enum(['DAILY', 'WEEKLY', 'CUSTOM']).optional(),
+  frequency: z.enum(['DAILY', 'WEEKLY', 'CUSTOM', 'INTERVAL']).optional(),
   customDays: z.array(z.number().min(0).max(6)).nullable().optional(),
   targetPerWeek: z.number().min(1).max(7).nullable().optional(),
+  intervalDays: z.number().min(2).max(365).nullable().optional(),
   archived: z.boolean().optional(),
 });
 
@@ -33,6 +35,7 @@ function formatHabit(habit: any): Habit {
     frequency: habit.frequency,
     customDays: habit.customDays.length > 0 ? habit.customDays : null,
     targetPerWeek: habit.targetPerWeek,
+    intervalDays: habit.intervalDays,
     createdAt: habit.createdAt.toISOString(),
     archived: habit.archived,
   };
@@ -84,6 +87,17 @@ export async function habitRoutes(server: FastifyInstance) {
     try {
       const body = createHabitSchema.parse(request.body);
 
+      // Validate frequency-specific fields
+      if (body.frequency === 'CUSTOM' && (!body.customDays || body.customDays.length === 0)) {
+        return reply.status(400).send({ success: false, error: 'customDays is required for CUSTOM frequency' });
+      }
+      if (body.frequency === 'WEEKLY' && !body.targetPerWeek) {
+        return reply.status(400).send({ success: false, error: 'targetPerWeek is required for WEEKLY frequency' });
+      }
+      if (body.frequency === 'INTERVAL' && !body.intervalDays) {
+        return reply.status(400).send({ success: false, error: 'intervalDays is required for INTERVAL frequency' });
+      }
+
       const habit = await prisma.habit.create({
         data: {
           userId: user.id,
@@ -93,6 +107,7 @@ export async function habitRoutes(server: FastifyInstance) {
           frequency: body.frequency,
           customDays: body.customDays || [],
           targetPerWeek: body.targetPerWeek,
+          intervalDays: body.intervalDays,
         },
       });
 
@@ -130,6 +145,7 @@ export async function habitRoutes(server: FastifyInstance) {
           ...(body.frequency !== undefined && { frequency: body.frequency }),
           ...(body.customDays !== undefined && { customDays: body.customDays || [] }),
           ...(body.targetPerWeek !== undefined && { targetPerWeek: body.targetPerWeek }),
+          ...(body.intervalDays !== undefined && { intervalDays: body.intervalDays }),
           ...(body.archived !== undefined && { archived: body.archived }),
         },
       });

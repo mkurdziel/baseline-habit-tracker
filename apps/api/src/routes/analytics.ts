@@ -3,7 +3,51 @@ import { prisma } from '../lib/prisma.js';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.js';
 import type { OverviewStats, CalendarData, HabitAnalytics } from '@habit-tracker/shared';
 
-function calculateStreak(completions: Date[], frequency: string, customDays: number[]): { current: number; longest: number } {
+function calculateIntervalStreak(uniqueDates: string[], intervalDays: number): { current: number; longest: number } {
+  const today = new Date().toISOString().split('T')[0];
+  let currentStreak = 0;
+  let longestStreak = 0;
+  let tempStreak = 1;
+
+  // Check if streak is active (last completion within interval window)
+  const lastCompletion = new Date(uniqueDates[0]);
+  const daysSinceLastCompletion = Math.floor(
+    (new Date(today).getTime() - lastCompletion.getTime()) / 86400000
+  );
+
+  const streakActive = daysSinceLastCompletion <= intervalDays;
+
+  // Calculate streaks by checking gaps between completions
+  for (let i = 0; i < uniqueDates.length - 1; i++) {
+    const currentDate = new Date(uniqueDates[i]);
+    const nextDate = new Date(uniqueDates[i + 1]);
+
+    const daysDiff = Math.floor(
+      (currentDate.getTime() - nextDate.getTime()) / 86400000
+    );
+
+    // If gap is within interval tolerance, continue streak
+    if (daysDiff <= intervalDays) {
+      tempStreak++;
+    } else {
+      // Streak broken
+      if (tempStreak > longestStreak) longestStreak = tempStreak;
+      tempStreak = 1;
+    }
+  }
+
+  if (tempStreak > longestStreak) longestStreak = tempStreak;
+  currentStreak = streakActive ? tempStreak : 0;
+
+  return { current: currentStreak, longest: longestStreak };
+}
+
+function calculateStreak(
+  completions: Date[],
+  frequency: string,
+  customDays: number[],
+  intervalDays: number | null = null
+): { current: number; longest: number } {
   if (completions.length === 0) return { current: 0, longest: 0 };
 
   const sortedDates = completions
@@ -12,6 +56,11 @@ function calculateStreak(completions: Date[], frequency: string, customDays: num
     .reverse();
 
   const uniqueDates = [...new Set(sortedDates)];
+
+  // For INTERVAL frequency, use different logic
+  if (frequency === 'INTERVAL' && intervalDays) {
+    return calculateIntervalStreak(uniqueDates, intervalDays);
+  }
 
   let currentStreak = 0;
   let longestStreak = 0;
@@ -69,7 +118,8 @@ function calculateCompletionRate(
   createdAt: Date,
   frequency: string,
   customDays: number[],
-  targetPerWeek: number | null
+  targetPerWeek: number | null,
+  intervalDays: number | null
 ): number {
   const now = new Date();
   const start = new Date(createdAt);
@@ -91,6 +141,9 @@ function calculateCompletionRate(
         expectedCompletions++;
       }
     }
+  } else if (frequency === 'INTERVAL' && intervalDays) {
+    // Expected completions = number of complete intervals + 1 (for day 0)
+    expectedCompletions = Math.floor(daysSinceCreation / intervalDays) + 1;
   }
 
   if (expectedCompletions === 0) return 0;
@@ -124,7 +177,8 @@ export async function analyticsRoutes(server: FastifyInstance) {
       const { current } = calculateStreak(
         h.completions.map(c => c.completedAt),
         h.frequency,
-        h.customDays
+        h.customDays,
+        h.intervalDays
       );
       return { habitId: h.id, habitName: h.name, streak: current };
     }).filter(s => s.streak > 0).sort((a, b) => b.streak - a.streak);
@@ -137,7 +191,8 @@ export async function analyticsRoutes(server: FastifyInstance) {
               h.createdAt,
               h.frequency,
               h.customDays,
-              h.targetPerWeek
+              h.targetPerWeek,
+              h.intervalDays
             );
           }, 0) / habits.length
         )
@@ -216,13 +271,14 @@ export async function analyticsRoutes(server: FastifyInstance) {
     }
 
     const completionDates = habit.completions.map(c => c.completedAt);
-    const { current, longest } = calculateStreak(completionDates, habit.frequency, habit.customDays);
+    const { current, longest } = calculateStreak(completionDates, habit.frequency, habit.customDays, habit.intervalDays);
     const completionRate = calculateCompletionRate(
       completionDates,
       habit.createdAt,
       habit.frequency,
       habit.customDays,
-      habit.targetPerWeek
+      habit.targetPerWeek,
+      habit.intervalDays
     );
 
     // Completions by day of week

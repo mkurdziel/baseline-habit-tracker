@@ -34,6 +34,9 @@ export default function HabitCard({ habit, date, onToggle }: HabitCardProps) {
   const frequencyLabel = () => {
     if (habit.frequency === 'DAILY') return 'Daily';
     if (habit.frequency === 'WEEKLY') return `${habit.targetPerWeek}x per week`;
+    if (habit.frequency === 'INTERVAL' && habit.intervalDays) {
+      return `Every ${habit.intervalDays} days`;
+    }
     if (habit.frequency === 'CUSTOM' && habit.customDays) {
       const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       return habit.customDays.map(d => days[d]).join(', ');
@@ -44,7 +47,7 @@ export default function HabitCard({ habit, date, onToggle }: HabitCardProps) {
   return (
     <div
       className={`card cursor-pointer transition-all hover:shadow-md ${
-        completed ? 'ring-2 ring-green-500 bg-green-50' : ''
+        completed ? 'ring-2 ring-green-500 bg-green-50 dark:bg-green-900/20' : ''
       }`}
       onClick={handleClick}
     >
@@ -53,7 +56,7 @@ export default function HabitCard({ habit, date, onToggle }: HabitCardProps) {
           className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
             completed
               ? 'bg-green-500 text-white'
-              : 'border-2 border-gray-300'
+              : 'border-2 border-gray-300 dark:border-gray-600'
           }`}
           style={!completed ? { borderColor: habit.color } : undefined}
         >
@@ -67,16 +70,16 @@ export default function HabitCard({ habit, date, onToggle }: HabitCardProps) {
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 truncate">{habit.name}</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">{habit.name}</h3>
           {habit.description && (
-            <p className="text-sm text-gray-500 truncate">{habit.description}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{habit.description}</p>
           )}
           <div className="mt-1 flex items-center gap-2">
             <span
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: habit.color }}
             />
-            <span className="text-xs text-gray-400">{frequencyLabel()}</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">{frequencyLabel()}</span>
           </div>
         </div>
       </div>

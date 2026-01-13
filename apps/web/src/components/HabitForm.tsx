@@ -22,6 +22,7 @@ export default function HabitForm({ habit, onSubmit, onClose }: HabitFormProps) 
   const [frequency, setFrequency] = useState<Frequency>(habit?.frequency || 'DAILY');
   const [customDays, setCustomDays] = useState<number[]>(habit?.customDays || []);
   const [targetPerWeek, setTargetPerWeek] = useState(habit?.targetPerWeek || 3);
+  const [intervalDays, setIntervalDays] = useState(habit?.intervalDays || 2);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,6 +40,8 @@ export default function HabitForm({ habit, onSubmit, onClose }: HabitFormProps) 
       data.customDays = customDays;
     } else if (frequency === 'WEEKLY') {
       data.targetPerWeek = targetPerWeek;
+    } else if (frequency === 'INTERVAL') {
+      data.intervalDays = intervalDays;
     }
 
     await onSubmit(data);
@@ -55,15 +58,15 @@ export default function HabitForm({ habit, onSubmit, onClose }: HabitFormProps) 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
             {habit ? 'Edit Habit' : 'Create Habit'}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Name
               </label>
               <input
@@ -78,7 +81,7 @@ export default function HabitForm({ habit, onSubmit, onClose }: HabitFormProps) 
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description (optional)
               </label>
               <textarea
@@ -92,7 +95,7 @@ export default function HabitForm({ habit, onSubmit, onClose }: HabitFormProps) 
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Color
               </label>
               <div className="flex gap-2 flex-wrap">
@@ -102,7 +105,7 @@ export default function HabitForm({ habit, onSubmit, onClose }: HabitFormProps) 
                     type="button"
                     onClick={() => setColor(c)}
                     className={`w-8 h-8 rounded-full transition-transform ${
-                      color === c ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : ''
+                      color === c ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-gray-500 scale-110' : ''
                     }`}
                     style={{ backgroundColor: c }}
                   />
@@ -111,11 +114,11 @@ export default function HabitForm({ habit, onSubmit, onClose }: HabitFormProps) 
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Frequency
               </label>
-              <div className="flex gap-2">
-                {(['DAILY', 'WEEKLY', 'CUSTOM'] as Frequency[]).map(f => (
+              <div className="flex gap-2 flex-wrap">
+                {(['DAILY', 'WEEKLY', 'CUSTOM', 'INTERVAL'] as Frequency[]).map(f => (
                   <button
                     key={f}
                     type="button"
@@ -123,10 +126,10 @@ export default function HabitForm({ habit, onSubmit, onClose }: HabitFormProps) 
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       frequency === f
                         ? 'bg-primary-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                     }`}
                   >
-                    {f === 'DAILY' ? 'Daily' : f === 'WEEKLY' ? 'Weekly' : 'Custom'}
+                    {f === 'DAILY' ? 'Daily' : f === 'WEEKLY' ? 'Weekly' : f === 'CUSTOM' ? 'Custom' : 'Interval'}
                   </button>
                 ))}
               </div>
@@ -134,7 +137,7 @@ export default function HabitForm({ habit, onSubmit, onClose }: HabitFormProps) 
 
             {frequency === 'WEEKLY' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Times per week
                 </label>
                 <input
@@ -150,7 +153,7 @@ export default function HabitForm({ habit, onSubmit, onClose }: HabitFormProps) 
 
             {frequency === 'CUSTOM' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Select days
                 </label>
                 <div className="flex gap-2">
@@ -162,13 +165,35 @@ export default function HabitForm({ habit, onSubmit, onClose }: HabitFormProps) 
                       className={`w-10 h-10 rounded-full text-sm font-medium transition-colors ${
                         customDays.includes(index)
                           ? 'bg-primary-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                       }`}
                     >
                       {day[0]}
                     </button>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {frequency === 'INTERVAL' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Every X days
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={intervalDays}
+                    onChange={e => setIntervalDays(parseInt(e.target.value) || 2)}
+                    min={2}
+                    max={365}
+                    className="input w-24"
+                  />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">days</span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Habit will be due every {intervalDays} day{intervalDays !== 1 ? 's' : ''}
+                </p>
               </div>
             )}
 

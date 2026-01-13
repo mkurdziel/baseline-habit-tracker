@@ -78,9 +78,9 @@ export default function Habits() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Habits</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Habits</h1>
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-gray-600">
+          <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <input
               type="checkbox"
               checked={showArchived}
@@ -97,7 +97,7 @@ export default function Habits() {
 
       {habits.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-gray-500">No habits yet. Create your first habit to get started!</p>
+          <p className="text-gray-500 dark:text-gray-400">No habits yet. Create your first habit to get started!</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -113,30 +113,30 @@ export default function Habits() {
                     style={{ backgroundColor: habit.color }}
                   />
                   <div>
-                    <h3 className="font-semibold text-gray-900">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                       {habit.name}
                       {habit.archived && (
-                        <span className="ml-2 text-xs text-gray-400">(archived)</span>
+                        <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">(archived)</span>
                       )}
                     </h3>
                     {habit.description && (
-                      <p className="text-sm text-gray-500">{habit.description}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{habit.description}</p>
                     )}
-                    <p className="text-xs text-gray-400 mt-1">{frequencyLabel(habit)}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{frequencyLabel(habit)}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleEdit(habit)}
-                    className="text-sm text-gray-500 hover:text-gray-700"
+                    className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                   >
                     Edit
                   </button>
                   {!habit.archived && (
                     <button
                       onClick={() => handleDelete(habit)}
-                      className="text-sm text-red-500 hover:text-red-700"
+                      className="text-sm text-red-500 hover:text-red-700 dark:hover:text-red-600"
                     >
                       Archive
                     </button>
